@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-z=(-c4lhv%5d34wy^az%7k9*w-7wdm7*_blaxoa0q5_uu0viyp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.3','5.77.91.144','c13d-87-10-3-101.ngrok.io']
+ALLOWED_HOSTS = ['192.168.1.3','5.77.91.144','c13d-87-10-3-101.ngrok.io','schoolmedia.herokuapp.com']
 
 
 # Application definition
