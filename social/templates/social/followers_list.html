@@ -1,0 +1,46 @@
+{%extends 'landing/base.html' %}
+
+{%block content%}
+
+<div class="container">
+
+    <div class="row mt-5">
+        <div class="col-md-3 col-sm-6">
+            <a href="{%url 'profile' profile.pk%}" class="btn btn-light">Back To Profile</a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-5 col-sm-12 border-bottom">
+            <p class="fs-3"><b>
+                {%if profile.name%}
+                {{profile.name}}
+                {%else%}
+                {{profile.user.username}}
+                {%endif%}
+            </b> Followers</p>
+        </div>
+    </div>
+
+    {% for follower in followers %}
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-5 col-sm-12 border-bottom position-relative">
+            <div class="mb-3">
+            <a href="{%url 'profile' follower.profile.pk%}">
+                <img class="rounded-circle post-img" height="50" width="50" src="{{follower.profile.picture.url}}"></a>
+            <p class="mt-0 mb-2 post-text fs-4 lead"><a class="text-primary post-link" href="{%url 'profile' follower.profile.pk%}">@{{ follower.profile.user }}</a></p>
+            </div>
+        </div>
+    </div>
+    {%endfor%}
+    {%if p_n == 0%}
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-5 col-sm-12 border-bottom">
+            <p class="fs-5">0 Profiles Found</p>
+        </div>
+    </div>
+    {%endif%}
+
+</div>
+
+{%endblock content%}

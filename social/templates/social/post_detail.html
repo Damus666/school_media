@@ -1,0 +1,188 @@
+{% extends 'landing/base.html' %}
+{% load crispy_forms_tags %}
+{%load static%}
+
+{% block content %}
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-md-5 col-sm-6">
+            <a href="{%url 'post-list'%}" class="btn btn-light">Back To Feed</a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-3 mb-1">
+        <div class="col-md-5 col-sm-12">
+            <p class="fs-4">Post:</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-2">
+        <div class="col-md-5 col-sm-12 border-bottom border-top border-start border-end">
+            <div>
+            <a href="{%url 'profile' post.author.profile.pk%}">
+                <img class="rounded-circle post-img" height="30" width="30" src="{{post.author.profile.picture.url}}"></a>
+            <p class="mt-2 post-text">
+                <a class="text-primary post-link" href="{%url 'profile' post.author.profile.pk%}">@{{ post.author }}</a> {{ post.created_on }}  
+                {%if request.user == post.author%}
+                    <a href="{%url 'post-edit' post.pk%}" class="edit-color"><i class="far fa-edit"></i></a> 
+                    <a href="{%url 'post-delete' post.pk%}" class="edit-color"><i class="fas fa-trash"></i></a>
+                {%endif%}
+            </p>
+            </div>
+            {%if post.image.count > 0%}
+                <div class="row">
+                    {%for img in post.image.all%}
+                    <div class="col-md-6 col-xs-12">
+                        <img src="{{img.image.url}}" class="post-image"/>
+                    </div>
+                    {%endfor%}
+                </div>
+                {%endif%}
+                <div class="body">
+            <p class="lead mb-3">{{post.body}}</p>
+            </div>
+
+            <div class="d-flex flex-row mb-2 mt-1">
+                <form method="POST" action="{%url 'like' post.pk%}">
+                    {%csrf_token%}
+                    <input type="hidden" name="next" value="{{request.path}}">
+                    <button class="remove-default-btn" type="submit">
+                    <i class="far fa-thumbs-up"> <span>{{post.likes.all.count}}</span></i></button>
+                </form>
+                <form method="POST" action="{%url 'dislike' post.pk%}">
+                    {%csrf_token%}
+                    <input type="hidden" name="next" value="{{request.path}}">
+                    <button class="remove-default-btn" type="submit">
+                    <i class="far fa-thumbs-down"></i> <span>{{post.dislikes.all.count}}</span></button>
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-5 col-sm-12">
+            <p class="fs-5">Add a Comment</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-3 mb-3">
+        <div class="col-md-5 col-sm-12">
+            <form method="POST" class="mb-3">
+                {%csrf_token%}
+                {{ form | crispy}}
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success mt-3">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-5 col-sm-12 mb-2 border-top">
+            <p class="fs-4 mt-3 mb-3">Comments:</p>
+        </div>
+    </div>
+    {%for comment in comments%}
+    {%if comment.is_parent%}
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-5 col-sm-12 border-bottom border-top border-start border-end">
+            <div class="mt-3">
+            <a href="{%url 'profile' comment.author.profile.pk%}">
+                <img class="rounded-circle post-img" height="30" width="30" src="{{comment.author.profile.picture.url}}"></a>
+            <p class="post-text">
+                <a class="text-primary post-link" href="{%url 'profile' comment.author.profile.pk%}">@{{ comment.author }}</a> {{ comment.created_on }}
+                {%if request.user == comment.author%}
+                    <a href="{%url 'comment-edit' post.pk comment.pk%}" class="edit-color"><i class="far fa-edit"></i></a>
+                    <a href="{%url 'comment-delete' post.pk comment.pk%}" class="edit-color"><i class="fas fa-trash"></i></a>
+                {%endif%}
+            </p>
+            </div>
+            <p class="lead">{{comment.comment}}</p>
+
+            <div class="d-flex flex-row mb-2 mt-1">
+                <form method="POST" action="{%url 'comment-like' post.pk comment.pk%}">
+                    {%csrf_token%}
+                    <input type="hidden" name="next" value="{{request.path}}">
+                    <button class="remove-default-btn" type="submit">
+                    <i class="far fa-thumbs-up"> <span>{{comment.likes.all.count}}</span></i></button>
+                </form>
+                <form method="POST" action="{%url 'comment-dislike' post.pk comment.pk%}">
+                    {%csrf_token%}
+                    <input type="hidden" name="next" value="{{request.path}}">
+                    <button class="remove-default-btn" type="submit">
+                    <i class="far fa-thumbs-down"></i> <span>{{comment.dislikes.all.count}}</span></button>
+                </form>
+
+                <div>
+                    <button class="remove-default-btn" onclick="commentReplyToggle('{{comment.pk}}')"><i class="far fa-comment-dots"></i></button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <!--<div class="d-none" id="{{comment.pk}}">-->
+    <div class="row justify-content-center mt-3 mb-3 d-none" style="margin-left:3rem" id="{{comment.pk}}">
+        <div class="col-md-5 col-sm-12 border-start border-bottom">
+            <form method="POST" class="mb-3" action="{%url 'comment-reply' post.pk comment.pk%}">
+                {%csrf_token%}
+                {{ form | crispy}}
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-success mt-3">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {%for child in comment.children%}
+    <div class="row justify-content-center child-comment" style="margin-left:3rem">
+        <div class="col-md-5 col-sm-12 border-bottom border-start">
+            <div class="mt-3">
+            <a href="{%url 'profile' child.author.profile.pk%}">
+                <img class="rounded-circle post-img" height="30" width="30" src="{{child.author.profile.picture.url}}"></a>
+            <p class="post-text">
+                <a class="text-primary post-link" href="{%url 'profile' child.author.profile.pk%}">@{{ child.author }}</a> {{ child.created_on }}
+                {%if request.user == child.author%}
+                    <a href="{%url 'comment-edit' post.pk child.pk%}" class="edit-color"><i class="far fa-edit"></i></a>
+                    <a href="{%url 'comment-delete' post.pk child.pk%}" class="edit-color"><i class="fas fa-trash"></i></a>
+                {%endif%}
+                <b class="lead fs-6">Reply To </b><a class="text-primary post-link fs-6 lead" href="{%url 'profile' comment.author.profile.pk%}">@{{ comment.author }}</a>
+            </p>
+            </div>
+            <p class="lead mt-0">{{child.comment}}</p>
+
+            <!--<div class="d-flex flex-row mb-2 mt-1">
+                <form method="POST" action="{%url 'comment-like' post.pk child.pk%}">
+                    {%csrf_token%}
+                    <input type="hidden" name="next" value="{{request.path}}">
+                    <button class="remove-default-btn" type="submit">
+                    <i class="far fa-thumbs-up"> <span>{{child.likes.all.count}}</span></i></button>
+                </form>
+                <form method="POST" action="{%url 'comment-dislike' post.pk child.pk%}">
+                    {%csrf_token%}
+                    <input type="hidden" name="next" value="{{request.path}}">
+                    <button class="remove-default-btn" type="submit">
+                    <i class="far fa-thumbs-down"></i> <span>{{child.dislikes.all.count}}</span></button>
+                </form>
+
+            </div>-->
+
+        </div>
+    </div>
+    {%endfor%}
+    <!--</div>-->
+    {%endif%}
+    {%endfor%}
+    {%if p_n == 0%}
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-5 col-sm-12 border-bottom border-top">
+            <p class="fs-5 mt-3">0 Comments Uploaded</p>
+        </div>
+    </div>
+    {%endif%}
+ 
+</div>
+
+
+{% endblock content %}
